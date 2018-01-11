@@ -14,7 +14,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -167,7 +169,7 @@ public class Main extends Application{
         scene1 = new Scene(hbox1, 800, 650);
     }
     int i = 0;
-    Label lbl;
+
     public void selectNameSommet()
     {
 
@@ -192,12 +194,14 @@ public class Main extends Application{
 
         VBox vbox2 = new VBox(10);
         vbox2.getChildren().addAll(lbl_nbre_sommet, hbox);
+
+
         btn_valider.setOnAction(e -> {
             String nameSommet = tf_nameSommet.getText();
             graphe.ajouterSommet(new Sommet(i, nameSommet));
 
             int j = i+1;
-            lbl = new Label("Votre sommet numéro " + j + " se nomme " + graphe.sommets.get(i).getNom());
+            Label lbl = new Label("Votre sommet numéro " + j + " se nomme " + graphe.sommets.get(i).getNom());
 
             tf_nameSommet.setText("");
 
@@ -207,8 +211,15 @@ public class Main extends Application{
 
             if (i == info.getNbreSommet())
             {
+
                 btn_valider.setText("Continuer");
                 tf_nameSommet.setVisible(false);
+
+                for (i = 0; i < graphe.sommets.size(); i++)
+                {
+                    graphe.sommets.get(i).setPosX(i + 50);
+                    graphe.sommets.get(i).setPosY(i + 50);
+                }
 
             }
 
@@ -272,14 +283,49 @@ public class Main extends Application{
 
         btn_valider.setOnAction(e -> {
 
-            Label lbl = new Label(tf_sommet1.getText() + " réagit avec " + tf_sommet2.getText());
+            String s1, s2;
+
+            s1 = tf_sommet1.getText();
+            s2 = tf_sommet2.getText();
+
+            Label lbl = new Label(s1 + " réagit avec " + s2);
             vbox2.getChildren().add(lbl);
+
+            int i = 0;
+            int num_s1 = 0, num_s2 = 0;
+            while(i<graphe.sommets.size()){
+                if (graphe.sommets.get(i).getNom().equals(s1))
+                {
+                    num_s1 = graphe.sommets.get(i).getNumero();
+                }
+                if (graphe.sommets.get(i).getNom().equals(s2))
+                {
+                    num_s2 = graphe.sommets.get(i).getNumero();
+                }
+                i++;
+
+
+            }
+            graphe.ajouterArret(new Arrete(graphe.sommets.get(num_s1), graphe.sommets.get(num_s2)));
         });
+
+
+
+
 
         btn_display_graph.setOnAction(e -> {
 
-            Label lbl = new Label(tf_sommet1.getText() + " réagit avec " + tf_sommet2.getText());
-            vbox2.getChildren().add(lbl);
+            int j = 0;
+            while(j<graphe.arrets.size()){
+                Label lbl = new Label(graphe.arrets.get(j).get_info_arrete(j));
+                vbox2.getChildren().add(lbl);
+
+                j++;
+            }
+
+            displayGraph();
+            window.setScene(scene4);
+
         });
 
 
@@ -291,60 +337,88 @@ public class Main extends Application{
 
     public void displayGraph()
     {
-        System.out.println(info.getNbreSommet() + " sommets");
-
-        nbre_sommet = info.getNbreSommet();
-
-        lbl_nbre_sommet = new Label("Vous avez " + info.getNbreSommet() + " sommets");
-
-        Button btn_valider = new Button("Valider");
-        Button btn_display_graph = new Button("Afficher le Graphe");
-
-        Label lbl_info = new Label("Indiquez les sommets qui réagissent entre eux : ");
-        Label label = new Label();
-        label.setText("-->");
-
-        tf_sommet1 = new TextField();
-        tf_sommet1.setPromptText("Sommet A");
-        tf_sommet1.setPrefSize(50, 20);
-
-        tf_sommet2 = new TextField();
-        tf_sommet2.setPromptText("Sommet B");
-        tf_sommet2.setPrefSize(50, 20);
-
-
-
-        HBox hbox = new HBox(10);
-
-        hbox.setPadding(new Insets(20, 20, 20, 20));
-        hbox.getChildren().addAll(lbl_info, tf_sommet1, label, tf_sommet2, btn_valider);
-
-        VBox vbox2 = new VBox(10);
-
-        Label lbl_text = new Label();
-
-
-
-
-
-
-        btn_valider.setOnAction(e -> {
-
-            Label lbl = new Label(tf_sommet1.getText() + " réagit avec " + tf_sommet2.getText());
-            vbox2.getChildren().add(lbl);
-        });
-
-        btn_display_graph.setOnAction(e -> {
-
-            Label lbl = new Label(tf_sommet1.getText() + " réagit avec " + tf_sommet2.getText());
-            vbox2.getChildren().add(lbl);
-        });
-
-
-        vbox2.getChildren().addAll(lbl_nbre_sommet, hbox, btn_display_graph, lbl_text);
-        vbox2.setPadding(new Insets(20, 20, 20, 20));
-        scene4 = new Scene(vbox2, 800, 650);
+        displaySommet();
+        displayArrete();
     }
+
+    public void displaySommet()
+    {
+        int i;
+        int width = 1260, height = 860;
+        Pane canvas = new Pane();
+        canvas.setStyle("-fx-background-color: white;");
+        canvas.setPrefSize(width,height);
+
+
+        int x = width/5;
+        int y = height/10;
+
+        int taille = graphe.sommets.size() - 1;
+
+        System.out.println("Taille : " + taille);
+
+        for (i = 0; i < taille; i++) {
+
+
+
+            if (i == 0) {
+
+                graphe.sommets.get(i).setPosX(i + x);
+                graphe.sommets.get(i).setPosY(i + y);
+
+                Circle circle = new Circle(20, Color.BLUE);
+                circle.relocate(graphe.sommets.get(i).getPosX(), graphe.sommets.get(i).getPosY());
+                
+                Label lbl = new Label(graphe.sommets.get(i).getNom());
+                lbl.setFont(Font.font("Verdana", 20));
+                lbl.setLayoutX(circle.getLayoutX() - circle.getRadius()/2 + 2);
+                lbl.setLayoutY(circle.getLayoutY() - circle.getRadius()/2 - 2);
+
+
+                canvas.getChildren().addAll(circle, lbl);
+            } else {
+
+                int k = graphe.sommets.get(i-1).getPosX() + 250;
+                int l = graphe.sommets.get(i-1).getPosY() + 250;
+
+                graphe.sommets.get(i).setPosX(k);
+                graphe.sommets.get(i).setPosY(l);
+
+
+
+
+                Circle circle = new Circle(20, Color.BLUE);
+                circle.relocate(k, l);
+
+                Label lbl = new Label(graphe.sommets.get(i).getNom());
+                lbl.setFont(Font.font("Verdana", 20));
+                lbl.setLayoutX(circle.getLayoutX() - circle.getRadius()/2 + 2);
+                lbl.setLayoutY(circle.getLayoutY() - circle.getRadius()/2 - 2);
+
+                Line line = new Line(graphe.sommets.get(i-1).getPosX() + 34, graphe.sommets.get(i-1).getPosY() + 34,
+                        graphe.sommets.get(i).getPosX() + 6, graphe.sommets.get(i).getPosY() + 6);
+
+                canvas.getChildren().addAll(circle, line, lbl);
+            }
+        }
+
+
+
+        scene4 = new Scene(canvas, width, height);
+    }
+
+    public void displayArrete()
+    {
+        int i;
+        for (i = 0; i < graphe.arrets.size(); i++)
+        {
+
+        }
+    }
+
+
+
+
 
     public static void get_sommet()
     {
