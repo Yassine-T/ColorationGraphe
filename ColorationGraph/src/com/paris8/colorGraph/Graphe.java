@@ -8,6 +8,7 @@ public class Graphe {
     protected List<Sommet> sommets;
     protected List<Arrete> arrets;
     private int size=0;
+    private int nombre_chromatique = 0;
 
     public int size(){
         return size;
@@ -31,6 +32,16 @@ public class Graphe {
 
     public boolean ajouterArret(Arrete a){
         return arrets.add(a);
+    }
+
+    public void setNombreChromatique(int nbre_chrom)
+    {
+         nombre_chromatique = nbre_chrom;
+    }
+
+    public int getNombreChromatique()
+    {
+        return nombre_chromatique;
     }
 
     public String get_info(Graphe g, int i){
